@@ -1,22 +1,49 @@
-import { useState } from "react";
+import { useState, useEffect} from "react";
 import axios from "axios";
+import { db } from "./firebase";
+import { collection, addDoc, getDocs, deleteDoc, doc } from "firebase/firestore";
 
 function App() {
   const [city, setCity] = useState(""); 
   const [weather, setWeather] = useState(null); 
   const [forecast, setForecast] = useState([]);
+  const [history, setHistory] = useState([]); 
+
 
   const API_KEY = "abbb5213d282802cf3af589336d277a9"; // OpenWeather API
   const WEATHER_URL = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`;
   const FORECAST_URL = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${API_KEY}&units=metric`;
 
+  useEffect(() => {
+    const fetchHistory = async () => {
+      const querySnapshot = await getDocs(collection(db, "weather_history"));
+      setHistory(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    };
+    fetchHistory();
+  }, []);
+  
   const fetchWeather = async () => {
     try {
       const response = await axios.get(WEATHER_URL);
       setWeather(response.data);
+
+      await addDoc(collection(db, "weather_history"), {
+        city: response.data.name,
+        country: response.data.sys.country,
+        temp: response.data.main.temp,
+        timestamp: new Date(),
+      });
+
+      const querySnapshot = await getDocs(collection(db, "weather_history"));
+      setHistory(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     } catch (error) {
       console.error("Error while retrieving weather data ( WEATHER_URL )", error);
     }
+  };
+
+  const deleteHistory = async (id) => {
+    await deleteDoc(doc(db, "weather_history", id));
+    setHistory(history.filter((item) => item.id !== id));
   };
 
   const fetchForecast = async () => {
@@ -77,6 +104,25 @@ function App() {
           )}
         </div>
       )}
+      
+      <div className="mt-4 bg-white p-4 rounded shadow w-96">
+        <h2 className="text-xl font-bold">📜 Historique</h2>
+        {history.length === 0 ? <p>Aucune recherche enregistrée.</p> : (
+          history.map((item) => (
+            <div key={item.id} className="border-t mt-2 pt-2 flex justify-between">
+              <p>📍 {item.city} ({item.country}) - {item.temp}°C</p>
+              <button
+                className="bg-red-500 text-white px-2 py-1 rounded"
+                onClick={() => deleteHistory(item.id)}
+              >
+                ❌ Supprimer
+              </button>
+            </div>
+          ))
+        )}
+    </div>
+
+      
     </div>
     
     {forecast.length > 0 && (
