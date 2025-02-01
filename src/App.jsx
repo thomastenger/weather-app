@@ -4,16 +4,30 @@ import axios from "axios";
 function App() {
   const [city, setCity] = useState(""); 
   const [weather, setWeather] = useState(null); 
+  const [forecast, setForecast] = useState([]);
 
   const API_KEY = "abbb5213d282802cf3af589336d277a9"; // OpenWeather API
-  const API_URL = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`;
+  const WEATHER_URL = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`;
+  const FORECAST_URL = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${API_KEY}&units=metric`;
 
   const fetchWeather = async () => {
     try {
-      const response = await axios.get(API_URL);
+      const response = await axios.get(WEATHER_URL);
       setWeather(response.data);
     } catch (error) {
-      console.error("Error while retrieving weather data", error);
+      console.error("Error while retrieving weather data ( WEATHER_URL )", error);
+    }
+  };
+
+  const fetchForecast = async () => {
+    try {
+      const response = await axios.get(FORECAST_URL);
+      const dailyForecasts = response.data.list.filter((reading) =>
+        reading.dt_txt.includes("12:00:00") 
+      );
+      setForecast(dailyForecasts);
+    } catch (error) {
+      console.error("Error while retrieving weather data ( FORECAST_URL)" , error);
     }
   };
 
@@ -29,12 +43,25 @@ function App() {
         onChange={(e) => setCity(e.target.value)}
       />
       
-      <button
-        onClick={fetchWeather}
-        className="px-4 py-2 bg-blue-500 text-white rounded"
-      >
-        Get the weather
-      </button>
+      <div className="flex gap-2" >
+        <button
+            onClick={fetchWeather}
+            className="px-4 py-2 bg-blue-500 text-white rounded"
+          >
+            Get the weather
+        </button>
+
+        <div className="flex gap-2" >
+        <button
+            onClick={fetchForecast}
+            className="px-4 py-2 bg-green-500 text-white rounded"
+          >
+           Forecast 5 days
+        </button>
+
+      </div>
+      
+      
 
       {weather && (
         <div className="mt-4 bg-white p-4 rounded shadow">
@@ -48,6 +75,20 @@ function App() {
           ) : (
             <p>🌞 No rain detected </p> 
           )}
+        </div>
+      )}
+    </div>
+    
+    {forecast.length > 0 && (
+        <div className="mt-4 bg-white p-4 rounded shadow">
+          <h2 className="text-xl font-bold">📅 Prévisions 5 jours</h2>
+          {forecast.map((day, index) => (
+            <div key={index} className="border-t mt-2 pt-2">
+              <p>📅 {new Date(day.dt * 1000).toLocaleDateString()}</p>
+              <p>🌡️ Temperature : {day.main.temp}°C</p>
+              <p>☁️ {day.weather[0].description}</p>
+            </div>
+          ))}
         </div>
       )}
     </div>
