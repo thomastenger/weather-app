@@ -161,7 +161,7 @@ function History() {
                             onChange={() => handleSelect(item.id)}
                             className="w-5 h-5"
                         />
-                        <p className="flex-1">📍 {item.city} ({item.country}) - {item.temp}°C</p>
+                        <p className="flex-1">📍 {item.city} ({item.country}) : {item.temp}°C</p>
                     </div>
                 ))
             )}
