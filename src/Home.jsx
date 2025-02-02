@@ -8,13 +8,15 @@ function Home() {
   const [weather, setWeather] = useState(null); 
   const [forecast, setForecast] = useState([]);
   const [coordinates, setCoordinates] = useState(null);
+  
 
 
 
-  const GOOGLE_API_KEY = "AIzaSyBnuNGtykrlIs9MpJExVzpzKG_3hQ7UfM4"; 
+
+  const GOOGLE_API_KEY = "AIzaSyBnuNGtykrlIs9MpJExVzpzKG_3hQ7UfM4"; // Google Maps Api Key
   const API_KEY = "abbb5213d282802cf3af589336d277a9"; // OpenWeather key API
-  const WEATHER_URL = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`;
-  const FORECAST_URL = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${API_KEY}&units=metric`;
+  const WEATHER_URL = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`;  
+  const FORECAST_URL = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${API_KEY}&units=metric`; // Link for the 5 day forecast 
 
   const fetchWeather = async () => {
     try {
@@ -44,12 +46,9 @@ function Home() {
       const location = response.data.results[0].geometry.location;
       setCoordinates({ lat: location.lat, lng: location.lng });
     } catch (error) {
-      console.error("Erreur lors de la récupération des coordonnées", error);
+      console.error("Error while retrieving weather data (Maps API) ", error);
     }
   };
-  
-
-  
 
   const fetchForecast = async () => {
     try {
@@ -65,7 +64,7 @@ function Home() {
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-200">
-      <h1 className="text-3xl font-bold mb-4">🌤️ Weather App</h1>
+      <h1 className="text-3xl font-bold mb-4">🌤️ Weather App Thomas Stenger</h1>
 
       <input
         type="text"
@@ -110,25 +109,25 @@ function Home() {
       )}
       
       {coordinates && (
-  <div className="mt-4 w-full flex justify-center">
-    <iframe
-      title="Google Maps"
-      width="600"
-      height="450"
-      style={{ border: 0 }}
-      loading="lazy"
-      allowFullScreen
-      referrerPolicy="no-referrer-when-downgrade"
-      src={`https://www.google.com/maps/embed/v1/place?key=${GOOGLE_API_KEY}&q=${coordinates.lat},${coordinates.lng}`}>
-    </iframe>
-  </div>
-)}
+        <div className="mt-4 w-full flex justify-center">
+            <iframe
+            title="Google Maps"
+            width="600"
+            height="450"
+            style={{ border: 0 }}
+            loading="lazy"
+            allowFullScreen
+            referrerPolicy="no-referrer-when-downgrade"
+            src={`https://www.google.com/maps/embed/v1/place?key=${GOOGLE_API_KEY}&q=${coordinates.lat},${coordinates.lng}`}>
+            </iframe>
+        </div>
+     )}
 
    
     
         {forecast.length > 0 && (
             <div className="mt-4 bg-white p-4 rounded shadow">
-            <h2 className="text-xl font-bold">📅 weather forecasts for next 5 days </h2>
+            <h2 className="text-xl font-bold">📅 5 day weather forecast </h2>
             {forecast.map((day, index) => (
                 <div key={index} className="border-t mt-2 pt-2">
                 <p>📅 {new Date(day.dt * 1000).toLocaleDateString()}</p>
