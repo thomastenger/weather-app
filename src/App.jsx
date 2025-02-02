@@ -1,19 +1,23 @@
 import { useState, useEffect} from "react";
 import axios from "axios";
 import { db } from "./firebase";
-import { collection, addDoc, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc} from "firebase/firestore";
 
 function App() {
   const [city, setCity] = useState(""); 
   const [weather, setWeather] = useState(null); 
   const [forecast, setForecast] = useState([]);
   const [history, setHistory] = useState([]); 
+  const [editId, setEditId] = useState(null);
+  const [newTemp, setNewTemp] = useState("");
 
 
-  const API_KEY = "abbb5213d282802cf3af589336d277a9"; // OpenWeather API
+  const API_KEY = "abbb5213d282802cf3af589336d277a9"; // OpenWeather key API
   const WEATHER_URL = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`;
   const FORECAST_URL = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${API_KEY}&units=metric`;
 
+
+  //Create 
   useEffect(() => {
     const fetchHistory = async () => {
       const querySnapshot = await getDocs(collection(db, "weather_history"));
@@ -22,6 +26,7 @@ function App() {
     fetchHistory();
   }, []);
   
+  //read
   const fetchWeather = async () => {
     try {
       const response = await axios.get(WEATHER_URL);
@@ -41,9 +46,20 @@ function App() {
     }
   };
 
+  //Delete
   const deleteHistory = async (id) => {
     await deleteDoc(doc(db, "weather_history", id));
     setHistory(history.filter((item) => item.id !== id));
+  };
+
+  //Update
+  const updateHistory = async (id) => {
+    const docRef = doc(db, "weather_history", id);
+    await updateDoc(docRef, { temp: parseFloat(newTemp) });
+
+    setHistory(history.map(item => item.id === id ? { ...item, temp: newTemp } : item));
+    setEditId(null);
+    setNewTemp("");
   };
 
   const fetchForecast = async () => {
@@ -111,18 +127,42 @@ function App() {
           history.map((item) => (
             <div key={item.id} className="border-t mt-2 pt-2 flex justify-between">
               <p>📍 {item.city} ({item.country}) - {item.temp}°C</p>
-              <button
-                className="bg-red-500 text-white px-2 py-1 rounded"
-                onClick={() => deleteHistory(item.id)}
-              >
-                ❌ Supprimer
-              </button>
+              {editId === item.id ? (
+                <div className="flex">
+                  <input
+                    type="number"
+                    placeholder="Nouvelle Température"
+                    className="p-1 border rounded mr-2"
+                    value={newTemp}
+                    onChange={(e) => setNewTemp(e.target.value)}
+                  />
+                  <button
+                    className="bg-green-500 text-white px-2 py-1 rounded"
+                    onClick={() => updateHistory(item.id)}
+                  >
+                    ✅ Valider
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <button
+                    className="bg-yellow-500 text-white px-2 py-1 rounded"
+                    onClick={() => setEditId(item.id)}
+                  >
+                    ✏️ Modifier
+                  </button>
+                  <button
+                    className="bg-red-500 text-white px-2 py-1 rounded ml-2"
+                    onClick={() => deleteHistory(item.id)}
+                  >
+                    ❌ Supprimer
+                  </button>
+                </>
+              )}
             </div>
           ))
         )}
-    </div>
-
-      
+      </div>
     </div>
     
     {forecast.length > 0 && (
