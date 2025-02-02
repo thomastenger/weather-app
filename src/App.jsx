@@ -2,6 +2,9 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Home from './Home'; 
 import History from './History'; 
 
+
+
+
 function App() {
   return (
     <Router>

@@ -7,7 +7,11 @@ function Home() {
   const [city, setCity] = useState(""); 
   const [weather, setWeather] = useState(null); 
   const [forecast, setForecast] = useState([]);
+  const [coordinates, setCoordinates] = useState(null);
 
+
+
+  const GOOGLE_API_KEY = "AIzaSyBnuNGtykrlIs9MpJExVzpzKG_3hQ7UfM4"; 
   const API_KEY = "abbb5213d282802cf3af589336d277a9"; // OpenWeather key API
   const WEATHER_URL = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`;
   const FORECAST_URL = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${API_KEY}&units=metric`;
@@ -17,6 +21,7 @@ function Home() {
       const response = await axios.get(WEATHER_URL);
       setWeather(response.data);
 
+      await fetchCoordinates(response.data.name);
       await addDoc(collection(db, "weather_history"), {
         city: response.data.name,
         country: response.data.sys.country,
@@ -30,6 +35,19 @@ function Home() {
       console.error("Error while retrieving weather data ( WEATHER_URL )", error);
     }
   };
+
+  const fetchCoordinates = async (city) => {
+    const GEO_URL = `https://maps.googleapis.com/maps/api/geocode/json?address=${city}&key=${GOOGLE_API_KEY}`;
+    
+    try {
+      const response = await axios.get(GEO_URL);
+      const location = response.data.results[0].geometry.location;
+      setCoordinates({ lat: location.lat, lng: location.lng });
+    } catch (error) {
+      console.error("Erreur lors de la récupération des coordonnées", error);
+    }
+  };
+  
 
   
 
@@ -91,6 +109,21 @@ function Home() {
         </div>
       )}
       
+      {coordinates && (
+  <div className="mt-4 w-full flex justify-center">
+    <iframe
+      title="Google Maps"
+      width="600"
+      height="450"
+      style={{ border: 0 }}
+      loading="lazy"
+      allowFullScreen
+      referrerPolicy="no-referrer-when-downgrade"
+      src={`https://www.google.com/maps/embed/v1/place?key=${GOOGLE_API_KEY}&q=${coordinates.lat},${coordinates.lng}`}>
+    </iframe>
+  </div>
+)}
+
    
     
         {forecast.length > 0 && (
