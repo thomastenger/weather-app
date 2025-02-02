@@ -64,7 +64,7 @@ function Home() {
     }
   };
 
-  // Function  5 day forecast
+  // Function  5 day Weather forecast
   const fetchForecast = async (cityName) => {
     const FORECAST_URL = `https://api.openweathermap.org/data/2.5/forecast?q=${cityName}&appid=${API_KEY}&units=metric`;
 
@@ -135,12 +135,12 @@ function Home() {
           📍 Current Weather
         </button>
         <button onClick={() => fetchForecast(weather?.name)} className="px-4 py-2 bg-green-500 text-white rounded">
-          📅 5 day Forecast
+          📅 5 day Weather Forecast
         </button>
       </div>
 
       
-      {loading && <p>Chargement...</p>}
+      {loading && <p>Loading...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
       {weather && (
@@ -171,7 +171,7 @@ function Home() {
       
       {forecast.length > 0 && (
         <div className="mt-4 bg-white p-4 rounded shadow">
-          <h2 className="text-xl font-bold">📅 5 day Forecast</h2>
+          <h2 className="text-xl font-bold">📅 5 day Weather Forecast</h2>
           {forecast.map((day, index) => (
             <div key={index} className="border-t mt-2 pt-2">
               <p>📅 {new Date(day.dt * 1000).toLocaleDateString()}</p>
