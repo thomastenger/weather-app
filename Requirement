@@ -1,0 +1,13 @@
+📦 Dependencies (requirements file)
+
+Below are the required packages, automatically installed with npm install:
+{
+  "dependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-router-dom": "^6.0.0",
+    "firebase": "^9.0.0",
+    "axios": "^0.27.0",
+    "tailwindcss": "^3.0.0"
+  }
+}
