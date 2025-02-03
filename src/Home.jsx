@@ -10,6 +10,7 @@ function Home() {
   const [coordinates, setCoordinates] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showForecast, setShowForecast] = useState(false);
 
   const GOOGLE_API_KEY = "AIzaSyBnuNGtykrlIs9MpJExVzpzKG_3hQ7UfM4"; // Google Maps API Key
   const API_KEY = "abbb5213d282802cf3af589336d277a9"; // OpenWeather API key
@@ -17,13 +18,14 @@ function Home() {
 
   const fetchWeatherByCity = async () => {
     if (!city) return;
+    setForecast([]);
     const WEATHER_URL = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`;
 
     try {
       const response = await axios.get(WEATHER_URL);
       setWeather(response.data);
       fetchCoordinates(response.data.name);
-      fetchForecast(response.data.name);
+      setShowForecast(false);
       saveToHistory(response.data);
     } catch (error) {
       setError("Error retrieving weather");
@@ -43,7 +45,7 @@ function Home() {
             const response = await axios.get(WEATHER_URL);
             setWeather(response.data);
             fetchCoordinates(response.data.name);
-            fetchForecast(response.data.name);
+            setShowForecast(false);
             saveToHistory(response.data);
           } catch (error) {
             setError("Error retrieving weather");
@@ -66,6 +68,7 @@ function Home() {
 
   // Function  5 day Weather forecast
   const fetchForecast = async (cityName) => {
+    if (!weather) return;
     const FORECAST_URL = `https://api.openweathermap.org/data/2.5/forecast?q=${cityName}&appid=${API_KEY}&units=metric`;
 
     try {
@@ -74,6 +77,7 @@ function Home() {
         reading.dt_txt.includes("12:00:00") 
       );
       setForecast(dailyForecasts);
+      setShowForecast(true);
     } catch (error) {
       console.error("Error in retrieving weather forecas.", error);
     }
@@ -169,9 +173,9 @@ function Home() {
       )}
 
       
-      {forecast.length > 0 && (
+      {forecast.length > 0 && weather?.name && (
         <div className="mt-4 bg-white p-4 rounded shadow">
-          <h2 className="text-xl font-bold">📅 5 day Weather Forecast</h2>
+          <h2 className="text-xl font-bold">📅 5 day Weather Forecast - {weather.name} </h2>
           {forecast.map((day, index) => (
             <div key={index} className="border-t mt-2 pt-2">
               <p>📅 {new Date(day.dt * 1000).toLocaleDateString()}</p>
